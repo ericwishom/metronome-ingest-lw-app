@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Metronome Usage Event</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      background: linear-gradient(135deg, #44e371, #33b07a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      display: flex;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      width: 90%;
+      max-width: 1000px;
+      overflow: hidden;
+    }
+
+    .form-section {
+      width: 50%;
+      padding: 30px;
+      backdrop-filter: blur(10px);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    input, select {
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      outline: none;
+      background-color: rgba(255, 255, 255, 0.9);
+      color: #333;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    button {
+      width: 48%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .send-btn {
+      background: linear-gradient(135deg, #33b07a, #44e371);
+      color: white;
+    }
+
+    .send-btn:hover {
+      background: linear-gradient(135deg, #28a065, #3fc979);
+    }
+
+    .clear-btn {
+      background: linear-gradient(135deg, #ff5c5c, #ff7a7a);
+      color: white;
+    }
+
+    .clear-btn:hover {
+      background: linear-gradient(135deg, #ff4b4b, #ff6565);
+    }
+
+    .response-section {
+      width: 50%;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    .response-header {
+      font-weight: bold;
+      font-size: 20px;
+      margin-bottom: 10px;
+      text-align: center;
+      color: #44e371;
+    }
+
+    .response-content {
+      margin-top: 20px;
+    }
+
+    .block {
+      margin-bottom: 30px;
+    }
+
+    .block strong {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .block pre {
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #e6e6e6;
+      border-radius: 8px;
+      padding: 15px;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 14px;
+      overflow-wrap: break-word;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Form Section -->
+    <div class="form-section">
+      <h2>Send Usage Event to Metronome</h2>
+      <form id="eventForm">
+        <input type="text" id="customer_id" placeholder="Customer ID" required />
+        <input type="text" id="warehouse_id" placeholder="Warehouse ID (e.g., wh_001)" required />
+        <input type="number" id="compute_hours" placeholder="Compute Hours" step="0.01" required />
+        <select id="region">
+          <option value="">Select Region</option>
+          <option>us-east1</option>
+          <option>us-east2</option>
+          <option>us-west1</option>
+          <option>eu-1</option>
+          <option>eu-2</option>
+        </select>
+        <select id="cloud_provider">
+          <option value="">Select Cloud Provider</option>
+          <option>AWS</option>
+          <option>GCP</option>
+        </select>
+        <select id="warehouse_size">
+          <option value="">Select Warehouse Size</option>
+          <option>small</option>
+          <option>medium</option>
+          <option>large</option>
+        </select>
+        <input type="number" id="storage_usage_gb" placeholder="Storage Usage (GB)" step="0.01" required />
+
+        <div class="button-group">
+          <button type="submit" class="send-btn">Send Event</button>
+          <button type="button" class="clear-btn" id="clearButton">Clear Data</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Request and Response Section -->
+    <div class="response-section" id="responseContainer">
+      <div class="response-header">Request and Response</div>
+      <div class="response-content" id="responseContent"></div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('eventForm').addEventListener('submit', async (e) => {
+      e.preventDefault(); // Prevent page reload
+
+      // Collect form data
+      const formData = {
+        customer_id: document.getElementById('customer_id').value,
+        warehouse_id: document.getElementById('warehouse_id').value,
+        compute_hours: document.getElementById('compute_hours').value,
+        region: document.getElementById('region').value,
+        cloud_provider: document.getElementById('cloud_provider').value,
+        warehouse_size: document.getElementById('warehouse_size').value,
+        storage_usage_gb: document.getElementById('storage_usage_gb').value
+      };
+
+      try {
+        const response = await fetch('/send-event', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+
+        // Display request and response as code
+        document.getElementById('responseContent').innerHTML = `
+          <div class="block">
+            <strong>Request Sent:</strong>
+            <pre>${JSON.stringify(formData, null, 2)}</pre>
+          </div>
+          <div class="block">
+            <strong>Response:</strong>
+            <pre>${JSON.stringify(result, null, 2)}</pre>
+          </div>
+        `;
+      } catch (error) {
+        document.getElementById('responseContent').innerHTML = `
+          <div class="block">
+            <strong>Error:</strong>
+            <pre>${error.message}</pre>
+          </div>
+        `;
+      }
+    });
+
+    // Clear form inputs when the 'Clear Data' button is clicked
+    document.getElementById('clearButton').addEventListener('click', () => {
+      document.getElementById('eventForm').reset();
+    });
+  </script>
+</body>
+</html>
