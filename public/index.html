@@ -6,11 +6,13 @@
   <title>Metronome Usage Event</title>
 
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Inter', sans-serif;
     }
 
     body {
@@ -33,44 +35,54 @@
 
     .form-section {
       width: 50%;
-      padding: 30px;
+      padding: 40px;
       backdrop-filter: blur(10px);
     }
 
     h2 {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
       color: #fff;
       font-weight: 600;
+      font-size: 24px;
     }
 
     input, select {
       width: 100%;
-      margin-bottom: 15px;
-      padding: 10px;
+      margin-bottom: 20px;
+      padding: 12px;
       border: none;
       border-radius: 8px;
       font-size: 16px;
-      outline: none;
       background-color: rgba(255, 255, 255, 0.9);
+      color: #333;
+      outline: none;
+      transition: box-shadow 0.3s;
+    }
+
+    input:focus, select:focus {
+      box-shadow: 0 0 8px rgba(68, 227, 113, 0.6);
+    }
+
+    select option {
       color: #333;
     }
 
     .button-group {
       display: flex;
       justify-content: space-between;
-      margin-top: 10px;
+      margin-top: 15px;
     }
 
     button {
       width: 48%;
-      padding: 12px;
+      padding: 15px;
       border: none;
       border-radius: 8px;
       font-size: 16px;
-      font-weight: bold;
+      font-weight: 600;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: background 0.3s, transform 0.2s;
     }
 
     .send-btn {
@@ -80,6 +92,7 @@
 
     .send-btn:hover {
       background: linear-gradient(135deg, #28a065, #3fc979);
+      transform: translateY(-2px);
     }
 
     .clear-btn {
@@ -89,20 +102,21 @@
 
     .clear-btn:hover {
       background: linear-gradient(135deg, #ff4b4b, #ff6565);
+      transform: translateY(-2px);
     }
 
     .response-section {
       width: 50%;
       background-color: rgba(0, 0, 0, 0.5);
       color: #fff;
-      padding: 30px;
+      padding: 40px;
       overflow-y: auto;
     }
 
     .response-header {
-      font-weight: bold;
+      font-weight: 600;
       font-size: 20px;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
       text-align: center;
       color: #44e371;
     }
@@ -139,24 +153,30 @@
     <div class="form-section">
       <h2>Send Usage Event to Metronome</h2>
       <form id="eventForm">
-        <input type="text" id="customer_id" placeholder="Customer ID" required />
+        <select id="customerDropdown" required>
+          <option value="" disabled selected>Select Customer</option>
+          <option value="7576dea5-543d-43d4-b152-97f9af45a42d">Raindrop Customer 1</option>
+          <option value="c6680482-5e92-43da-959b-819f3d177c74">Raindrop Customer 2</option>
+          <option value="6296c96b-077e-4821-bf2c-56129e2b1f09">Raindrop Customer 3</option>
+        </select>
+
         <input type="text" id="warehouse_id" placeholder="Warehouse ID (e.g., wh_001)" required />
         <input type="number" id="compute_hours" placeholder="Compute Hours" step="0.01" required />
-        <select id="region">
-          <option value="">Select Region</option>
+        <select id="region" required>
+          <option value="" disabled selected>Select Region</option>
           <option>us-east1</option>
           <option>us-east2</option>
           <option>us-west1</option>
           <option>eu-1</option>
           <option>eu-2</option>
         </select>
-        <select id="cloud_provider">
-          <option value="">Select Cloud Provider</option>
+        <select id="cloud_provider" required>
+          <option value="" disabled selected>Select Cloud Provider</option>
           <option>AWS</option>
           <option>GCP</option>
         </select>
-        <select id="warehouse_size">
-          <option value="">Select Warehouse Size</option>
+        <select id="warehouse_size" required>
+          <option value="" disabled selected>Select Warehouse Size</option>
           <option>small</option>
           <option>medium</option>
           <option>large</option>
@@ -179,11 +199,12 @@
 
   <script>
     document.getElementById('eventForm').addEventListener('submit', async (e) => {
-      e.preventDefault(); // Prevent page reload
+      e.preventDefault();
 
-      // Collect form data
+      const customer_id = document.getElementById('customerDropdown').value;
+
       const formData = {
-        customer_id: document.getElementById('customer_id').value,
+        customer_id,
         warehouse_id: document.getElementById('warehouse_id').value,
         compute_hours: document.getElementById('compute_hours').value,
         region: document.getElementById('region').value,
@@ -201,7 +222,6 @@
 
         const result = await response.json();
 
-        // Display request and response as code
         document.getElementById('responseContent').innerHTML = `
           <div class="block">
             <strong>Request Sent:</strong>
@@ -222,7 +242,6 @@
       }
     });
 
-    // Clear form inputs when the 'Clear Data' button is clicked
     document.getElementById('clearButton').addEventListener('click', () => {
       document.getElementById('eventForm').reset();
     });
