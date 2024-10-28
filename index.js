@@ -1,5 +1,8 @@
 import express from 'express';
 import fetch from 'node-fetch'; // Use `import` instead of `require`
+import dotenv from 'dotenv'
+
+dotenv.config(); // Load environment variables from .env file
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -8,7 +11,7 @@ app.use(express.static('public'));
 app.use(express.json());
 
 const METRONOME_ENDPOINT = 'https://api.metronome.com/v1/ingest';
-const API_TOKEN = 'b591013cd32f59db334be371d5775e823ee41abc6890932f1cd5498189ff79b0';
+const API_TOKEN = process.env.API_TOKEN;
 
 function generateRandomHex(len) {
   const chars = 'abcdef0123456789';
